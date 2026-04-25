@@ -1,249 +1,165 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fast Result — Diagnóstico Digital Gratuito</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #ffffff;
-      --bg-secondary: #f5f5f3;
-      --bg-info: #e6f1fb;
-      --text: #1a1a18;
-      --text-secondary: #5f5e5a;
-      --text-info: #185fa5;
-      --border: rgba(0,0,0,0.12);
-      --border-secondary: rgba(0,0,0,0.22);
-      --border-info: #378add;
-      --radius-md: 8px;
-      --radius-lg: 12px;
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1c1c1a; --bg-secondary: #252522; --bg-info: #042c53;
-        --text: #f0ede8; --text-secondary: #a0a09a; --text-info: #85b7eb;
-        --border: rgba(255,255,255,0.12); --border-secondary: rgba(255,255,255,0.22);
-      }
-    }
-    body { font-family: var(--font); background: var(--bg-secondary); color: var(--text); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem 4rem; }
-    .wrap { width: 100%; max-width: 580px; }
-    .header { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; }
-    .logo { font-size: 22px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-    .logo span { color: var(--text-info); }
-    .tagline { font-size: 14px; color: var(--text-secondary); }
-    .progress { display: flex; gap: 6px; margin-bottom: 1.5rem; }
-    .dot { height: 4px; flex: 1; border-radius: 2px; background: var(--border); transition: background 0.3s; }
-    .dot.done { background: var(--border-info); }
-    .step { display: none; }
-    .step.active { display: block; }
-    .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
-    .question { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 1.25rem; line-height: 1.5; }
-    .hint { font-size: 13px; color: var(--text-secondary); margin: -0.75rem 0 1rem; }
-    .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
-    .opt { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; cursor: pointer; font-size: 14px; color: var(--text); text-align: left; font-family: var(--font); transition: border-color 0.15s, background 0.15s; }
-    .opt:hover { border-color: var(--border-secondary); }
-    .opt.selected { border: 1.5px solid var(--border-info); background: var(--bg-info); color: var(--text-info); }
-    input[type="text"] { width: 100%; padding: 10px 14px; font-size: 15px; border: 0.5px solid var(--border); border-radius: var(--radius-md); background: var(--bg); color: var(--text); font-family: var(--font); margin-bottom: 1.25rem; outline: none; transition: border-color 0.15s; }
-    input[type="text"]:focus { border-color: var(--border-info); }
-    .btn { background: var(--bg); border: 0.5px solid var(--border-secondary); border-radius: var(--radius-md); padding: 10px 22px; font-size: 14px; color: var(--text); cursor: pointer; font-family: var(--font); transition: background 0.15s; }
-    .btn:hover { background: var(--bg-secondary); }
-    .btn-primary { border-color: var(--border-info); color: var(--text-info); }
-    .section-title { font-size: 11px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
-    .result-text { font-size: 14px; color: var(--text); line-height: 1.7; }
-    .action-item { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 10px; padding-left: 12px; border-left: 2px solid var(--border-info); }
-    .action-day { font-weight: 500; color: var(--text-info); display: block; font-size: 12px; margin-bottom: 2px; }
-    .content-box { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 14px; font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre-wrap; margin-top: 0.5rem; }
-    .pacote { border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 0.75rem; background: var(--bg); }
-    .pacote.recomendado { border: 1.5px solid var(--border-info); }
-    .badge { display: inline-block; font-size: 11px; padding: 3px 10px; background: var(--bg-info); color: var(--text-info); border-radius: var(--radius-md); margin-bottom: 8px; }
-    .pacote-nome { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-    .pacote-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.5; }
-    .pacote-preco { font-size: 13px; color: var(--text-info); font-weight: 500; }
-    .loading { font-size: 14px; color: var(--text-secondary); padding: 2rem 0; text-align: center; }
-    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--border-info); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .cta-box { background: var(--bg-info); border: 0.5px solid var(--border-info); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 1rem; text-align: center; }
-    .cta-box p { font-size: 14px; color: var(--text-info); margin-bottom: 0.75rem; line-height: 1.5; }
-    .cta-box a { display: inline-block; background: var(--text-info); color: #fff; border-radius: var(--radius-md); padding: 10px 22px; font-size: 14px; text-decoration: none; font-family: var(--font); }
-    .motivo { font-size: 13px; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.5; }
-    .footer { text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 2rem; }
-    .error-msg { font-size: 14px; color: #a32d2d; padding: 1rem 0; text-align: center; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fast Result</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f3;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
+.w{width:100%;max-width:560px}
+.card{background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+h1{font-size:22px;font-weight:500;color:#185fa5;margin-bottom:4px}
+.sub{font-size:14px;color:#666;margin-bottom:1.5rem}
+.q{font-size:15px;font-weight:500;margin-bottom:1rem;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.opt{background:#fff;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:12px 16px;cursor:pointer;font-size:14px;text-align:left;font-family:inherit}
+.opt:hover{border-color:#378add}
+.opt.sel{border:2px solid #378add;background:#e6f1fb;color:#185fa5}
+input{width:100%;padding:10px 14px;font-size:15px;border:1px solid rgba(0,0,0,0.15);border-radius:8px;font-family:inherit;margin-bottom:1.25rem;outline:none}
+input:focus{border-color:#378add}
+.btn{background:#fff;border:1px solid #378add;border-radius:8px;padding:10px 22px;font-size:14px;color:#185fa5;cursor:pointer;font-family:inherit}
+.step{display:none}.step.on{display:block}
+.prog{display:flex;gap:6px;margin-bottom:1.5rem}
+.dot{height:4px;flex:1;border-radius:2px;background:rgba(0,0,0,0.1)}
+.dot.on{background:#378add}
+pre{background:#f5f5f3;border-radius:8px;padding:14px;font-size:13px;line-height:1.8;white-space:pre-wrap;font-family:inherit;margin-top:8px}
+.ai{font-size:14px;line-height:1.7;color:#1a1a18}
+.ac{border-left:2px solid #378add;padding-left:12px;margin-bottom:10px}
+.acd{font-size:11px;color:#378add;font-weight:500;margin-bottom:2px}
+.pk{border:1px solid rgba(0,0,0,0.1);border-radius:10px;padding:1rem;margin-bottom:8px}
+.pk.rec{border:2px solid #378add}
+.pn{font-size:15px;font-weight:500;margin-bottom:4px}
+.pd{font-size:13px;color:#666;margin-bottom:6px}
+.pp{font-size:13px;color:#185fa5;font-weight:500}
+.bdg{display:inline-block;font-size:11px;padding:2px 8px;background:#e6f1fb;color:#185fa5;border-radius:6px;margin-bottom:6px}
+.cta{background:#e6f1fb;border:1px solid #378add;border-radius:12px;padding:1.25rem;margin-top:1rem;text-align:center}
+.cta p{font-size:14px;color:#185fa5;margin-bottom:10px}
+.cta a{display:inline-block;background:#185fa5;color:#fff;border-radius:8px;padding:10px 22px;font-size:14px;text-decoration:none}
+.err{color:#a32d2d;font-size:14px;padding:1rem 0;text-align:center}
+.sp{display:inline-block;width:18px;height:18px;border:2px solid rgba(0,0,0,0.1);border-top-color:#378add;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <div class="header">
-    <p class="logo">Fast <span>Result</span></p>
-    <p class="tagline">Diagnóstico gratuito de presença digital — resultados em 7 dias</p>
-  </div>
+<div class="w">
+<div class="card">
+<h1>Fast Result</h1>
+<p class="sub">Diagnóstico gratuito de presença digital — resultados em 7 dias</p>
+</div>
 
-  <div class="progress">
-    <div class="dot done" id="d0"></div>
-    <div class="dot" id="d1"></div>
-    <div class="dot" id="d2"></div>
-    <div class="dot" id="d3"></div>
-    <div class="dot" id="d4"></div>
-  </div>
+<div class="prog">
+<div class="dot on" id="d0"></div>
+<div class="dot" id="d1"></div>
+<div class="dot" id="d2"></div>
+<div class="dot" id="d3"></div>
+<div class="dot" id="d4"></div>
+</div>
 
-  <div class="step active" id="step-0">
-    <div class="card">
-      <p class="question">Bem-vindo ao Fast Result. Qual é o teu nome?</p>
-      <input type="text" id="nome" placeholder="Escreve o teu nome..." />
-      <button class="btn btn-primary" onclick="goStep1()">Continuar →</button>
-    </div>
-  </div>
+<div class="step on" id="s0">
+<div class="card">
+<p class="q">Bem-vindo ao Fast Result. Qual é o teu nome?</p>
+<input type="text" id="nome" placeholder="Escreve o teu nome..."/>
+<button class="btn" onclick="go1()">Continuar →</button>
+</div>
+</div>
 
-  <div class="step" id="step-1">
-    <div class="card">
-      <p class="question" id="lbl1">Qual é o tipo do teu negócio?</p>
-      <div class="options">
-        <button class="opt" onclick="selectOpt(this,'negocio','Loja / Comércio')">Loja / Comércio</button>
-        <button class="opt" onclick="selectOpt(this,'negocio','Serviços (salão, clínica, oficina...)')">Serviços (salão, clínica, oficina...)</button>
-        <button class="opt" onclick="selectOpt(this,'negocio','Restaurante / Alimentação')">Restaurante / Alimentação</button>
-        <button class="opt" onclick="selectOpt(this,'negocio','Infoprodutos / Formação')">Infoprodutos / Formação</button>
-        <button class="opt" onclick="selectOpt(this,'negocio','Outro')">Outro</button>
-      </div>
-      <button class="btn btn-primary" onclick="goStep2()">Continuar →</button>
-    </div>
-  </div>
+<div class="step" id="s1">
+<div class="card">
+<p class="q" id="q1">Qual é o tipo do teu negócio?</p>
+<div class="opts">
+<button class="opt" onclick="sel(this,'neg','Loja / Comércio')">Loja / Comércio</button>
+<button class="opt" onclick="sel(this,'neg','Serviços (salão, clínica, oficina...)')">Serviços (salão, clínica, oficina...)</button>
+<button class="opt" onclick="sel(this,'neg','Restaurante / Alimentação')">Restaurante / Alimentação</button>
+<button class="opt" onclick="sel(this,'neg','Infoprodutos / Formação')">Infoprodutos / Formação</button>
+<button class="opt" onclick="sel(this,'neg','Outro')">Outro</button>
+</div>
+<button class="btn" onclick="go2()">Continuar →</button>
+</div>
+</div>
 
-  <div class="step" id="step-2">
-    <div class="card">
-      <p class="question">Qual é o maior problema da tua presença digital agora?</p>
-      <div class="options">
-        <button class="opt" onclick="selectOpt(this,'problema','Pouco alcance — poucas pessoas vêem o meu conteúdo')">Pouco alcance — poucas pessoas vêem o meu conteúdo</button>
-        <button class="opt" onclick="selectOpt(this,'problema','Tenho views mas não converto em vendas')">Tenho views mas não converto em vendas</button>
-        <button class="opt" onclick="selectOpt(this,'problema','Não sei o que publicar ou não tenho tempo')">Não sei o que publicar ou não tenho tempo</button>
-        <button class="opt" onclick="selectOpt(this,'problema','O meu WhatsApp não gera clientes')">O meu WhatsApp não gera clientes</button>
-        <button class="opt" onclick="selectOpt(this,'problema','Não tenho presença digital nenhuma')">Não tenho presença digital nenhuma</button>
-      </div>
-      <button class="btn btn-primary" onclick="goStep3()">Continuar →</button>
-    </div>
-  </div>
+<div class="step" id="s2">
+<div class="card">
+<p class="q">Qual é o maior problema da tua presença digital?</p>
+<div class="opts">
+<button class="opt" onclick="sel(this,'prob','Pouco alcance — poucas pessoas vêem o meu conteúdo')">Pouco alcance — poucas pessoas vêem o meu conteúdo</button>
+<button class="opt" onclick="sel(this,'prob','Tenho views mas não converto em vendas')">Tenho views mas não converto em vendas</button>
+<button class="opt" onclick="sel(this,'prob','Não sei o que publicar ou não tenho tempo')">Não sei o que publicar ou não tenho tempo</button>
+<button class="opt" onclick="sel(this,'prob','O meu WhatsApp não gera clientes')">O meu WhatsApp não gera clientes</button>
+<button class="opt" onclick="sel(this,'prob','Não tenho presença digital nenhuma')">Não tenho presença digital nenhuma</button>
+</div>
+<button class="btn" onclick="go3()">Continuar →</button>
+</div>
+</div>
 
-  <div class="step" id="step-3">
-    <div class="card">
-      <p class="question">Onde tens presença agora?</p>
-      <p class="hint">Podes escolher mais de um</p>
-      <div class="options">
-        <button class="opt" onclick="toggleOpt(this,'plataformas','Instagram')">Instagram</button>
-        <button class="opt" onclick="toggleOpt(this,'plataformas','Facebook')">Facebook</button>
-        <button class="opt" onclick="toggleOpt(this,'plataformas','WhatsApp Business')">WhatsApp Business</button>
-        <button class="opt" onclick="toggleOpt(this,'plataformas','TikTok')">TikTok</button>
-        <button class="opt" onclick="toggleOpt(this,'plataformas','Website / Página')">Website / Página</button>
-        <button class="opt" onclick="toggleOpt(this,'plataformas','Nenhuma ainda')">Nenhuma ainda</button>
-      </div>
-      <button class="btn btn-primary" onclick="goStep4()">Gerar diagnóstico →</button>
-    </div>
-  </div>
+<div class="step" id="s3">
+<div class="card">
+<p class="q">Onde tens presença agora? <span style="font-size:12px;color:#666;font-weight:400">(podes escolher mais de um)</span></p>
+<div class="opts">
+<button class="opt" onclick="tog(this,'Instagram')">Instagram</button>
+<button class="opt" onclick="tog(this,'Facebook')">Facebook</button>
+<button class="opt" onclick="tog(this,'WhatsApp Business')">WhatsApp Business</button>
+<button class="opt" onclick="tog(this,'TikTok')">TikTok</button>
+<button class="opt" onclick="tog(this,'Website / Página')">Website / Página</button>
+<button class="opt" onclick="tog(this,'Nenhuma ainda')">Nenhuma ainda</button>
+</div>
+<button class="btn" onclick="go4()">Gerar diagnóstico →</button>
+</div>
+</div>
 
-  <div class="step" id="step-4">
-    <div class="card" id="loading-block">
-      <div class="loading"><span class="spinner"></span>A analisar o teu negócio...</div>
-    </div>
-    <div id="result-block"></div>
-  </div>
-
-  <div class="footer">Fast Result © 2025 &nbsp;·&nbsp; Powered by IA</div>
+<div class="step" id="s4">
+<div class="card" id="load"><div style="text-align:center;padding:1rem"><span class="sp"></span>A analisar o teu negócio...</div></div>
+<div id="res"></div>
+</div>
 </div>
 
 <script>
-const S = { nome: '', negocio: '', problema: '', plataformas: [] };
+const D={nome:'',neg:'',prob:'',plat:[]};
 
-function goStep1() {
-  const v = document.getElementById('nome').value.trim();
-  if (!v) { document.getElementById('nome').focus(); return; }
-  S.nome = v;
-  document.getElementById('lbl1').textContent = S.nome + ', qual é o tipo do teu negócio?';
-  showStep(1);
-}
-function goStep2() { if (!S.negocio) return; showStep(2); }
-function goStep3() { if (!S.problema) return; showStep(3); }
-function goStep4() { if (S.plataformas.length === 0) return; showStep(4); generate(); }
+function go1(){const v=document.getElementById('nome').value.trim();if(!v)return;D.nome=v;document.getElementById('q1').textContent=v+', qual é o tipo do teu negócio?';show(1);}
+function go2(){if(!D.neg)return;show(2);}
+function go3(){if(!D.prob)return;show(3);}
+function go4(){if(D.plat.length===0)return;show(4);run();}
 
-function showStep(n) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step-' + n).classList.add('active');
-  for (let i = 0; i <= 4; i++) {
-    const d = document.getElementById('d' + i);
-    if (d) d.classList.toggle('done', i <= n);
-  }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function show(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s'+n).classList.add('on');
+  for(let i=0;i<=4;i++){const d=document.getElementById('d'+i);if(d)d.classList.toggle('on',i<=n);}
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function selectOpt(el, key, val) {
-  el.closest('.options').querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  S[key] = val;
-}
+function sel(el,k,v){el.closest('.opts').querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');D[k]=v;}
+function tog(el,v){el.classList.toggle('sel');if(el.classList.contains('sel')){if(!D.plat.includes(v))D.plat.push(v);}else{D.plat=D.plat.filter(x=>x!==v);}}
 
-function toggleOpt(el, key, val) {
-  el.classList.toggle('selected');
-  if (el.classList.contains('selected')) {
-    if (!S[key].includes(val)) S[key].push(val);
-  } else {
-    S[key] = S[key].filter(v => v !== val);
-  }
-}
-
-async function generate() {
-  try {
-    const res = await fetch('/diagnose', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nome: S.nome,
-        negocio: S.negocio,
-        problema: S.problema,
-        plataformas: S.plataformas.join(', ')
-      })
+async function run(){
+  try{
+    const r=await fetch('/diagnose',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nome:D.nome,negocio:D.neg,problema:D.prob,plataformas:D.plat.join(', ')})
     });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    render(data);
-  } catch(e) {
-    document.getElementById('loading-block').innerHTML = '<p class="error-msg">Erro ao gerar diagnóstico. Recarrega a página e tenta novamente.</p>';
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    render(d);
+  }catch(e){
+    document.getElementById('load').innerHTML='<p class="err">Erro ao gerar diagnóstico. Recarrega a página e tenta novamente.</p>';
   }
 }
 
-function render(d) {
-  document.getElementById('loading-block').style.display = 'none';
-  const rb = document.getElementById('result-block');
-  const pacotes = [
-    { nome: 'Conteúdo', desc: 'Scripts, legendas, ganchos e plano semanal prontos. Tu executas, eu estruturo tudo.', preco: '20.000 – 30.000 Kz / mês', id: 'Conteúdo' },
-    { nome: 'WhatsApp Poderoso', desc: 'Automações, scripts de resposta, sequências de follow-up e catálogo optimizado.', preco: '25.000 – 35.000 Kz pagamento único', id: 'WhatsApp' },
-    { nome: 'Arranque Digital', desc: 'Landing page simples + WhatsApp configurado. Para quem está a começar do zero.', preco: '40.000 – 60.000 Kz pagamento único', id: 'Arranque' }
+function render(d){
+  document.getElementById('load').style.display='none';
+  const rb=document.getElementById('res');
+  const pks=[
+    {nome:'Conteúdo',desc:'Scripts, legendas, ganchos e plano semanal prontos.',preco:'20.000–30.000 Kz / mês',id:'Conteúdo'},
+    {nome:'WhatsApp Poderoso',desc:'Automações, scripts de resposta e sequências de follow-up.',preco:'25.000–35.000 Kz pagamento único',id:'WhatsApp'},
+    {nome:'Arranque Digital',desc:'Landing page simples + WhatsApp configurado.',preco:'40.000–60.000 Kz pagamento único',id:'Arranque'}
   ];
-  rb.innerHTML = `
-    <div class="card">
-      <p class="section-title">Diagnóstico</p>
-      <p class="result-text">${d.diagnostico}</p>
-    </div>
-    <div class="card">
-      <p class="section-title">O que fazer esta semana</p>
-      ${d.acoes_semana.map(a => `<div class="action-item"><span class="action-day">${a.dias}</span>${a.acao}</div>`).join('')}
-    </div>
-    <div class="card">
-      <p class="section-title">${d.conteudo_pronto.formato} — pronto a usar</p>
-      <div class="content-box">${d.conteudo_pronto.texto}</div>
-    </div>
-    <div class="card">
-      <p class="section-title">Pacotes disponíveis</p>
-      ${pacotes.map(p => `
-        <div class="pacote ${d.pacote_recomendado && d.pacote_recomendado.includes(p.id) ? 'recomendado' : ''}">
-          ${d.pacote_recomendado && d.pacote_recomendado.includes(p.id) ? '<span class="badge">Recomendado para ti</span>' : ''}
-          <p class="pacote-nome">${p.nome}</p>
-          <p class="pacote-desc">${p.desc}</p>
-          <p class="pacote-preco">${p.preco}</p>
-        </div>`).join('')}
-      <p class="motivo">${d.motivo_pacote}</p>
-    </div>
-    <div class="cta-box">
-      <p>Gostaste do diagnóstico? A primeira semana é gratuita — sem compromisso.</p>
-      <a href="https://wa.me/244XXXXXXXXX?text=Olá!%20Fiz%20o%20diagnóstico%20Fast%20Result%20e%20quero%20começar." target="_blank">Falar no WhatsApp →</a>
-    </div>
+  rb.innerHTML=`
+    <div class="card"><p style="font-size:11px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">Diagnóstico</p><p class="ai">${d.diagnostico}</p></div>
+    <div class="card"><p style="font-size:11px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">O que fazer esta semana</p>${d.acoes_semana.map(a=>`<div class="ac"><div class="acd">${a.dias}</div>${a.acao}</div>`).join('')}</div>
+    <div class="card"><p style="font-size:11px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">${d.conteudo_pronto.formato} — pronto a usar</p><pre>${d.conteudo_pronto.texto}</pre></div>
+    <div class="card"><p style="font-size:11px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">Pacotes disponíveis</p>${pks.map(p=>`<div class="pk ${d.pacote_recomendado&&d.pacote_recomendado.includes(p.id)?'rec':''}">${d.pacote_recomendado&&d.pacote_recomendado.includes(p.id)?'<span class="bdg">Recomendado</span><br>':''}<p class="pn">${p.nome}</p><p class="pd">${p.desc}</p><p class="pp">${p.preco}</p></div>`).join('')}<p style="font-size:13px;color:#666;margin-top:.75rem">${d.motivo_pacote}</p></div>
+    <div class="cta"><p>Gostaste? A primeira semana é gratuita — sem compromisso.</p><a href="https://wa.me/244943759472?text=Olá!%20Fiz%20o%20diagnóstico%20Fast%20Result%20e%20quero%20começar." target="_blank">Falar no WhatsApp →</a></div>
   `;
 }
 </script>
