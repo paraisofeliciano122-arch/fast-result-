@@ -190,7 +190,7 @@ function toggleOpt(el, key, val) {
 
 async function generate() {
   try {
-    const res = await fetch('/.netlify/functions/diagnose', {
+    const res = await fetch('/diagnose', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -242,7 +242,7 @@ function render(d) {
     </div>
     <div class="cta-box">
       <p>Gostaste do diagnóstico? A primeira semana é gratuita — sem compromisso.</p>
-      <a href="https://wa.me/244943759472?text=Olá!%20Fiz%20o%20diagnóstico%20Fast%20Result%20e%20quero%20começar." target="_blank">Falar no WhatsApp →</a>
+      <a href="https://wa.me/244XXXXXXXXX?text=Olá!%20Fiz%20o%20diagnóstico%20Fast%20Result%20e%20quero%20começar." target="_blank">Falar no WhatsApp →</a>
     </div>
   `;
 }
